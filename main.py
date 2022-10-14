@@ -25,14 +25,8 @@ def update_M(a00, a01, a02, a10, a11, a12, angle, scale, center):
                     [a10, a11, a12]])
     M_rotated = cv2.getRotationMatrix2D( center, angle, scale )
 
-    #setting the a11 and a22 values for M_rotated to be 0
-    # to not count them twice 
-    M_rotated[0][0] = 0
-    M_rotated[1][1] = 0
-    M_rotated[0][2] = 0
-    M_rotated[1][2] = 0
-
-    M = M + M_rotated
+    # taking the average of the two
+    M = (M + M_rotated) / 2.0
     #print(M)
 
     return M
@@ -46,7 +40,7 @@ def get_result(img, M):
 if img_file is None:
     img = cv2.imread("grid.png")
 else:
-    img = cv2.imread(img_file.name)
+    img = cv2.imread(img_file.name) 
 
 img = imutils.resize(img, width=720)
 result = img.copy()
@@ -65,11 +59,20 @@ a10 = col1.slider("a10", -2.0, 2.0, 0.0, 0.001, key="a10")
 a11 = col2.slider("a11", 0.0, 2.0, 1.0, 0.001, key="a11")
 a12 = col3.slider("a12", -height, height, 0, 1, key="a12")
 
+
+
+
 cola , colb = st.columns((0.8,0.2))
 
 # adding angle and scale slider
 angle = colb.slider("Angle", -180, 180, 0, key="angle")
 scale = colb.slider("Scale", 0.0, 2.0, 1.0, key="scale")
+
+
+#add an option for rotation from center 
+rotate_from_center = colb.checkbox('Rotate from Center')
+
+center = (width//2, height//2) if rotate_from_center  else (0,0)
 
 M = update_M(a00, a01, a02, a10, a11, a12, angle, scale, center)
 bg_image = get_matrix_as_image(M)
